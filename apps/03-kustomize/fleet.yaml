@@ -1,0 +1,10 @@
+# Fleet runs kustomize build on a different overlay depending on the target cluster.
+defaultNamespace: fleet-poc-kustomize
+kustomize:
+  dir: overlays/dev          # default overlay
+targetCustomizations:
+  - name: prod
+    clusterSelector:
+      matchLabels: { env: prod }
+    kustomize:
+      dir: overlays/prod

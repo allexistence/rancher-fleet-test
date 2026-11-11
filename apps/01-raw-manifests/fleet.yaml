@@ -1,0 +1,4 @@
+# Fleet bundle options for this folder. Every *.yaml here (except fleet.yaml) is deployed as-is.
+defaultNamespace: fleet-poc-raw
+labels:
+  poc: rancher-fleet

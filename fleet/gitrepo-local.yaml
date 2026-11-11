@@ -1,0 +1,27 @@
+# Deploy to the Rancher "local" cluster itself (namespace fleet-local).
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: fleet-poc
+  namespace: fleet-local
+spec:
+  repo: https://github.com/CHANGE-ME/fleet-poc   # <-- your Git repo URL
+  branch: main
+  pollingInterval: 15s
+  paths:
+    - apps/01-raw-manifests
+    - apps/02-helm
+    - apps/03-kustomize
+
+  # Everything from this repo goes into ONE namespace (overrides defaultNamespace in each fleet.yaml).
+  # Optional: remove it to let each app use its own fleet-poc-* namespace (then also drop serviceAccount
+  # or extend the RBAC to cover those namespaces).
+  targetNamespace: fleet-poc
+
+  # Optional: deploy as this restricted SA instead of the agent's cluster-admin.
+  # Must exist in cattle-fleet-local-system first (fleet/rbac-local.yaml).
+  serviceAccount: fleet-poc-deployer
+
+  correctDrift:
+    enabled: true          # Fleet reverts manual kubectl changes
+  # clientSecretName: git-auth   # uncomment for a private repo (see README)

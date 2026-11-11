@@ -1,0 +1,14 @@
+resources:
+  - ../../base
+nameSuffix: -prod
+commonLabels:
+  env: prod
+patches:
+  - target: { kind: Deployment, name: echo }
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value: ["-text=hello from the prod overlay"]

@@ -1,0 +1,63 @@
+# Service account Fleet uses to deploy the POC on the Rancher (local) cluster.
+# For the local cluster the fleet-agent runs in cattle-fleet-local-system,
+# so the service account has to be created in that namespace.
+# Apply BEFORE the GitRepo:  kubectl apply -f fleet/rbac-local.yaml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fleet-poc                     # matches spec.targetNamespace in gitrepo-local.yaml
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fleet-poc-deployer
+  namespace: cattle-fleet-local-system
+---
+# Full rights, but only inside the target namespace (Deployments, Services, ConfigMaps, Helm release Secrets...)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: fleet-poc-deployer
+  namespace: fleet-poc
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: fleet-poc-deployer
+  namespace: fleet-poc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: fleet-poc-deployer
+subjects:
+  - kind: ServiceAccount
+    name: fleet-poc-deployer
+    namespace: cattle-fleet-local-system
+---
+# Fleet/Helm need to read namespaces cluster-wide (read-only)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fleet-poc-deployer-ns-read
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fleet-poc-deployer-ns-read
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fleet-poc-deployer-ns-read
+subjects:
+  - kind: ServiceAccount
+    name: fleet-poc-deployer
+    namespace: cattle-fleet-local-system

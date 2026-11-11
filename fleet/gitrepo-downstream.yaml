@@ -1,0 +1,21 @@
+# Option B: deploy to downstream clusters managed by Rancher (namespace fleet-default).
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: fleet-poc
+  namespace: fleet-default
+spec:
+  repo: https://github.com/CHANGE-ME/fleet-poc   # <-- your Git repo URL
+  branch: main
+  pollingInterval: 15s
+  paths:
+    - apps/01-raw-manifests
+    - apps/02-helm
+    - apps/03-kustomize
+  correctDrift:
+    enabled: true
+  targets:
+    - name: poc-clusters
+      clusterSelector:
+        matchExpressions:
+          - { key: env, operator: In, values: [dev, prod] }

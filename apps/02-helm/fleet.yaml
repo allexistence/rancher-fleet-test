@@ -1,0 +1,29 @@
+# Fleet installs a Helm chart straight from a chart repo - no chart files in Git.
+defaultNamespace: fleet-poc-helm
+helm:
+  releaseName: podinfo
+  repo: https://stefanprodan.github.io/podinfo
+  chart: podinfo
+  version: 6.7.1
+  values:
+    replicaCount: 1
+    ui:
+      message: "Deployed by Fleet (default values)"
+      color: "#34577c"
+
+# Per-cluster overrides, chosen by labels on the Fleet Cluster object.
+targetCustomizations:
+  - name: dev
+    clusterSelector:
+      matchLabels: { env: dev }
+    helm:
+      values:
+        replicaCount: 1
+        ui: { message: "Fleet -> DEV cluster", color: "#2e7d32" }
+  - name: prod
+    clusterSelector:
+      matchLabels: { env: prod }
+    helm:
+      values:
+        replicaCount: 3
+        ui: { message: "Fleet -> PROD cluster", color: "#c62828" }
